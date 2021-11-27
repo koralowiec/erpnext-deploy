@@ -1,0 +1,10 @@
+---
+
+- name: Deploy ERPNext
+  hosts: servers
+  tasks:
+    - name: Stop and remove containers and volumes
+      community.docker.docker_compose:
+        project_src: "{{ erp_next_dir }}"
+        state: absent
+        remove_volumes: yes

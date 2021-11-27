@@ -1,0 +1,16 @@
+servers:
+  hosts:
+    srv_test:
+      ansible_host: 192.168.40.31
+      erp_environment: test
+    srv_prod:
+      ansible_host: 192.168.40.30
+      erp_environment: prod
+  vars:
+    ansible_user: user1@zi.local
+    users:
+      - user1@zi.local
+      - user2@zi.local
+    erp_next_dir: /usr/local/erpnext
+    group: "domain users@zi.local"
+

@@ -1,0 +1,21 @@
+---
+- name: Install needed packages
+  hosts: servers
+  tasks:
+    - name: Install libffi-dev
+      become: true
+      apt:
+        name: libffi-dev
+        update_cache: yes
+
+- name: Install Docker and Docker Compose
+  hosts: servers
+  become: true
+  vars:
+    pip_install_packages:
+      - name: docker      
+      - name: docker-compose
+    docker_users: "{{ users }}"
+  roles:
+    - geerlingguy.pip
+    - geerlingguy.docker

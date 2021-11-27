@@ -1,0 +1,47 @@
+---
+
+- name: Deploy ERPNext
+  hosts: servers
+  tasks:
+    - name: Create directory for deploy files
+      become: true
+      ansible.builtin.file:
+        path: "{{ erp_next_dir }}"
+        state: directory
+        mode: '0775'
+        owner: "{{ ansible_user }}"
+        group: "{{ group }}"
+
+    - name: Copy files
+      ansible.builtin.copy:
+        src: "./frappe-docker/{{ item.src }}"
+        dest: "{{ erp_next_dir }}/{{ item.dest | default('') }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ group }}"
+        mode: "{{ item.mode | default('0664') }}"
+      loop:
+        - { src: "docker-compose.yml" }
+        - { src: "env-{{ erp_environment }}", dest: ".env" }
+        - { src: "installation" }
+        - { src: "db-access.sh", mode: '0774' }
+
+    - name: Run containers
+      community.docker.docker_compose:
+        project_src: "{{ erp_next_dir }}"              
+        state: present
+
+    - name: Exec patch on db
+      community.docker.docker_container_exec:      
+        container: erpnext_mariadb_1
+        command: /tmp/db-access.sh
+      register: exec_result
+
+    - name: Pring result of exec
+      debug:
+        var: exec_result      
+
+    - name: Restart containers
+      community.docker.docker_compose:
+        project_src: "{{ erp_next_dir }}"              
+        state: present
+        restarted: yes
